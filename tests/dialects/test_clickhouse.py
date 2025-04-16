@@ -766,6 +766,19 @@ ORDER BY (
             pretty=True,
         )
 
+    def test_create_table_as_alias(self):
+        ctas_alias = "CREATE TABLE my_db.my_table AS another_db.another_table"
+
+        expected = exp.Create(
+            this=exp.Table(this=exp.Identifier(this="my_table"), db=exp.Identifier(this="my_db")),
+            kind="TABLE",
+            expression=exp.Table(
+                this=exp.Identifier(this="another_table"), db=exp.Identifier(this="another_db")
+            ),
+        )
+        self.assertEqual(self.parse_one(ctas_alias), expected)
+        self.validate_identity(ctas_alias)
+
     def test_ddl(self):
         db_table_expr = exp.Table(this=None, db=exp.to_identifier("foo"), catalog=None)
         create_with_cluster = exp.Create(
@@ -1219,6 +1232,15 @@ LIFETIME(MIN 0 MAX 0)""",
                     self.validate_identity(
                         f"SELECT {func_alias}(SECOND, 1, bar)",
                         f"SELECT {func_name}(SECOND, 1, bar)",
+                    )
+        # 4-arg functions of type <func>(unit, value, date, timezone)
+        for func in (("DATE_DIFF", "DATEDIFF"),):
+            func_name = func[0]
+            for func_alias in func:
+                with self.subTest(f"Test 4-arg date-time function {func_alias}"):
+                    self.validate_identity(
+                        f"SELECT {func_alias}(SECOND, 1, bar, 'UTC')",
+                        f"SELECT {func_name}(SECOND, 1, bar, 'UTC')",
                     )
 
     def test_convert(self):
