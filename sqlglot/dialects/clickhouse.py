@@ -22,7 +22,7 @@ from sqlglot.dialects.dialect import (
     unit_to_var,
     trim_sql,
 )
-from sqlglot.expressions import DateDiff
+from sqlglot.expressions import DataType, DateDiff
 from sqlglot.generator import Generator
 from sqlglot.helper import is_int, seq_get
 from sqlglot.tokens import Token, TokenType
@@ -279,6 +279,7 @@ class ClickHouse(Dialect):
             "LOWCARDINALITY": TokenType.LOWCARDINALITY,
             "MAP": TokenType.MAP,
             "NESTED": TokenType.NESTED,
+            "NOTHING": TokenType.NULL,
             "SAMPLE": TokenType.TABLE_SAMPLE,
             "TUPLE": TokenType.STRUCT,
             "UINT16": TokenType.USMALLINT,
@@ -1037,6 +1038,7 @@ class ClickHouse(Dialect):
             exp.DataType.Type.LOWCARDINALITY: "LowCardinality",
             exp.DataType.Type.MAP: "Map",
             exp.DataType.Type.NESTED: "Nested",
+            exp.DataType.Type.NULL: "Nothing",
             exp.DataType.Type.SMALLINT: "Int16",
             exp.DataType.Type.STRUCT: "Tuple",
             exp.DataType.Type.TINYINT: "Int8",
